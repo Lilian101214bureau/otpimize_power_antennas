@@ -49,9 +49,16 @@ Tout le dépot se base sur la structure interne de l'outil eznec, on retrouvera 
 
 ### Installation rapide (via pip)
 
-pip install PyNEC==1.7.3.4
 pip install numpy
 pip install matplotlib
 pip install scipy
 
+### Se déplaces au dossier contenant le code full_wave_approach EXEMPLE A ADAPTER EN FONCTION DE L'EMPLACEMENT DU GIT CLONE 
+ cd C:\Documents\python-necpp\PyNEC\example\project\structurationned_code\full_wave_approach
+
+### Mettre à jour pip, setuptools et wheel 
+pip install --upgrade pip setuptools wheel
+
+### Dans un terminal  
+pip install PyNEC==1.7.3.4
 
