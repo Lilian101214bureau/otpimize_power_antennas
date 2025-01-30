@@ -1,4 +1,42 @@
-#test_get_matrix.py
+"""
+--------------------------------------------------------------------------------
+FICHIER : test_get_matrix.py
+
+DESCRIPTION :
+Ce script a pour objectif de générer et d’enregistrer les matrices d’impédance
+de différents scénarios d’antennes (aléatoires et manuels), ainsi que de calculer
+et sauvegarder diverses grandeurs électriques associées (tensions, courants,
+puissances, etc.).
+
+FONCTIONNEMENT GÉNÉRAL :
+1) Paramétrage global (chemins d’accès, constantes, etc.).
+2) SCÉNARIO(S) ALÉATOIRE(S) :
+   - Génération de la géométrie (coordonnées des antennes) de façon aléatoire.
+   - Calcul de la matrice d’impédance [Z].
+   - Visualisation et enregistrement de la géométrie.
+   - Sauvegarde de la matrice [Z] et des résultats (Voc, courants, puissances...).
+   - Mesure et enregistrement du temps de simulation.
+3) SCÉNARIO MANUEL :
+   - Définition manuelle des antennes (coords, type, impédances de charge…).
+   - Calcul de [Z], sauvegarde de la géométrie et des résultats,
+     ainsi que le temps de calcul.    
+4) Génération des différents fichiers CSV et PNG relatifs aux résultats
+   (matrices, grandeurs calculées, temps de calcul).
+
+UTILISATION :
+- Adapter les paramètres (chemins de sauvegarde des données, nombre d'antennes, etc.) selon vos besoins.
+- Lancer le script (python test_get_matrix.py) : il génère automatiquement
+  les fichiers de résultats dans le dossier spécifié.
+
+DÉPENDANCES :
+- Python 3.x
+- numpy, matplotlib, csv, os, time
+- Modules internes : geometry.py, simulation.py, plotting.py, constants.py
+  (fournissant les fonctions et constantes utilisées dans ce script)
+
+ AUTEUR : Michalak Lilian / Équipe : Rhodes / lilianmichalak2002@gmail.com
+--------------------------------------------------------------------------------
+"""
 import os
 import csv
 import numpy as np
@@ -21,7 +59,7 @@ from constants import lam, half_length
 
 def main():
     # 1) Paramètres globaux
-    results_dir = r"C:\Documents\python-necpp\PyNEC\example\project\structurationned_code\full_wave_approach\result_matrix"
+    results_dir = r"C:\Documents\python-necpp\PyNEC\example\project\structurationned_code\full_wave_approach\result_matrix" #à modifier pour sauvegarder vos resultats dans vos dossiers
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 

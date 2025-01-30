@@ -1,6 +1,76 @@
-########################################
-# test_3_antennas_varying_distance.py
-########################################
+"""
+--------------------------------------------------------------------------------
+FICHIER : test_3_antennas_varying_distance.py
+
+DESCRIPTION GLOBALE :
+Ce script simule un système de trois antennes (un émetteur, un récepteur et un
+réflecteur) afin d'analyser l'impact de la distance entre l'émetteur et le
+récepteur sur les performances de transfert de puissance. Selon le scénario,
+le réflecteur peut être absent, chargé de manière continue, discrète ou encore
+adapté pour chacun des dipôles de façon indépendante.
+
+PRINCIPAUX SCÉNARIOS :
+1) Scénario A (scenarioA_imZin) :
+   - 2 dipôles (émetteur & récepteur), sans réflecteur.
+   - Impédances de l’émetteur et du récepteur ajustées (ém => -jIm(Zin), rx => conj(Zin_rx)).
+   - Étude de la puissance reçue en fonction de la distance.
+
+2) Scénario B2 (scenarioB_ga_reflector_only) :
+   - 3 dipôles (ém, rx, réflecteur).
+   - Réflecteur optimisé en continu (via un algorithme génétique) pour maximiser
+     le transfert de puissance vers le récepteur.
+
+3) Scénario C2 (scenarioC_discrete_reflector_only) :
+   - 3 dipôles (ém, rx, réflecteur).
+   - Réflecteur optimisé de manière discrète (valeurs d'impédance issues d'une
+     liste de réactances pré-définies) via un algorithme d'optimisation.
+
+4) Scénario ReflectAll (scenarioReflectAll) :
+   - 3 dipôles (ém, rx, réflecteur).
+   - Chaque antenne est adaptée sur son -jIm(Zin) (émetteur et réflecteur) ou conj(Zin_rx)
+     (récepteur). Le but est d’observer les performances dans cette configuration
+     complètement ajustée.
+
+5) Scénario C_discrete_imagOnly (scenarioC_discrete_imagOnly) :
+   - Variation du nombre d'états d'impédances purement imaginaires disponibles
+     pour le réflecteur (N = 4, 5, 8, etc.). On compare la puissance reçue selon N.
+
+ORGANISATION :
+- Chaque scénario est implémenté via une fonction dédiée (e.g. scenarioA_imZin, scenarioB_ga_reflector_only, etc.).
+- Les résultats (impédances, tensions, puissances, etc.) sont rassemblés dans des
+  dictionnaires, puis enregistrés au format CSV dans un dossier de sortie.
+- Des tracés (matplotlib) sont également générés pour visualiser :
+   * l’impédance vue à l’entrée des dipôles,
+   * la puissance reçue en fonction de la distance,
+   * la charge du réflecteur optimisée en fonction de la distance, etc.
+
+UTILISATION :
+1. Adaptez le chemin de sortie (out_dir) pour enregistrer les résultats (CSV, PNG).
+2. Exécutez le script via : 
+       python test_3_antennas_varying_distance.py
+3. Les fichiers de résultats (CSV) et graphiques (PNG) seront créés dans le dossier
+   spécifié (out_dir).
+
+DÉPENDANCES :
+- Python 3.x
+- numpy, matplotlib, csv, os, math
+- Modules internes :
+    * constants.py       (définition de lam, half_length, etc.)
+    * geometry.py        (génération manuelle de coord. d'antennes)
+    * simulation.py      (calcul d’impédances, tensions en circuit ouvert, etc.)
+    * plotting.py        (fonctions de visualisation 3D/2D)
+    * optimization.py    (fonctions d’optimisation GA ou discrète)
+
+RÉSULTATS :
+- CSV : pour chaque scénario, un fichier regroupe l’ensemble des impédances et
+  grandeurs calculées (Voc, Vin, Vl, courants, charges du réflecteur…).
+- Figures PNG : représentation de la géométrie, courbes de puissance vs distance,
+  impédances en entrée, etc.
+
+AUTEUR : Michalak Lilian / Équipe : Rhodes / lilianmichalak2002@gmail.com
+--------------------------------------------------------------------------------
+"""
+
 
 import os
 import csv
@@ -489,11 +559,8 @@ def main():
         zlr = resB2.get("ZL_reflector", None)
         scenario_dataB2["ZL_reflector"].append(zlr if zlr is not None else complex(0,0))
 
-        figgeom, axgeom = plot_antennas(coordsB2, lam=lam, show=False)
-        axgeom.set_title(f"Géom B2, d={d_:.2f}λ", fontsize=9)
         outgeo = os.path.join(out_dir, f"geom_B2_{d_:.2f}.png")
-        plt.savefig(outgeo, dpi=150)
-        plt.close(figgeom)
+        plot_antennas(coordsB2, lam=lam, filename=outgeo)
 
     for k_ in scenario_dataB2:
         scenario_dataB2[k_] = np.vstack(scenario_dataB2[k_])
@@ -515,11 +582,9 @@ def main():
         zlr = resC2.get("ZL_reflector", None)
         scenario_dataC2["ZL_reflector"].append(zlr if zlr is not None else complex(0,0))
 
-        figgeom, axgeom = plot_antennas(coordsC2, lam=lam, show=False)
-        axgeom.set_title(f"Géom C2, d={d_:.2f}λ", fontsize=9)
+        
         outgeo = os.path.join(out_dir, f"geom_C2_{d_:.2f}.png")
-        plt.savefig(outgeo, dpi=150)
-        plt.close(figgeom)
+        plot_antennas(coordsC2, lam=lam, filename=outgeo)
 
     print(scenario_dataC2["Zin"])
     for k_ in scenario_dataC2:
@@ -542,19 +607,12 @@ def main():
         zlr = resRef.get("ZL_reflector", None)
         scenario_dataReflect["ZL_reflector"].append(zlr if zlr is not None else complex(0,0))
 
-        figgeom, axgeom = plot_antennas(coordsRef, lam=lam, show=False)
-        axgeom.set_title(f"Géométrie ReflectAll, d={d_:.2f}λ", fontsize=9)
-        outgeo = os.path.join(out_dir, f"geom_refAll_{d_:.2f}.png")
-        plt.savefig(outgeo, dpi=150)
-        plt.close(figgeom)
-    print("ccccccccc")
-    print(scenario_dataReflect["Zin"])
-    print ("cccccccccccc")
+        outgeo = os.path.join(out_dir, f"ReflectAll{d_:.2f}.png")
+        plot_antennas(coordsRef, lam=lam, filename=outgeo)
+    
     for k_ in scenario_dataReflect:
         scenario_dataReflect[k_] = np.vstack(scenario_dataReflect[k_])
-    print("dddd")
-    print(scenario_dataReflect["Zin"])
-    print ("ddd")
+    
     ############################
     # scenarioC_discrete_imagOnly (N=2..12)
     ############################

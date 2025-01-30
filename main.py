@@ -1,18 +1,72 @@
 """
-===========
+--------------------------------------------------------------------------------
+FICHIER : main.py
 
-Point d'entrée principal du programme :
-- Gère la création de scenarii (positions d'antennes)
-- Lance les différentes stratégies : 
-    * GA global
-    * "ReflectAll"
-    * Reflecteurs en continu
-    * Reflecteurs en discret (N)
-- Sauvegarde des résultats (PNG, CSV, etc.)
+DESCRIPTION GLOBALE :
+Point d'entrée principal du programme. Il permet de :
+- Générer et/ou charger différentes géométries d’antennes (manuelles, aléatoires,
+  circulaires, carrées, linéaires, etc.).
+- Lancer plusieurs stratégies d'optimisation/ajustement de charges :
+    1) GA global (optimisation simultanée de toutes les charges d'antennes).
+    2) "ReflectAll" (adaptation spécifique de l'émetteur, du récepteur et
+       de tous les réflecteurs).
+    3) "Reflecteurs en continu" (algorithme génétique optimisant seulement
+       les réflecteurs).
+    4) "Reflecteurs en discret (N)" (optimisation de la charge du réflecteur
+       dans une liste pré-définie de valeurs/réactances).
+- Enregistrer les résultats : images PNG (géométrie, représentations des puissances),
+  fichiers CSV (impédances optimisées, puissances mesurées, etc.).
+
+ORGANISATION DU SCRIPT :
+1) Import des modules et constantes (lam, half_length).
+2) Définition des fonctions principales de scénario :
+   - `run_scenario(...)` : gère le GA global sur toutes les antennes,
+     génère une configuration de charges et calcule les puissances.
+   - `run_scenario_reflect_all(...)` : implémente la stratégie "ReflectAll"
+     (adaptation -jIm(Zin) pour émetteurs/réflecteurs et conj(Zin) pour le récepteur).
+   - `run_scenario_continu_reflectors(...)` : n’optimise que les réflecteurs
+     en continu (GA).
+   - `run_scenario_discret_reflectors(...)` : n’optimise que les réflecteurs
+     en mode discret (valeurs de réactances prédéfinies).
+3) La fonction `main()` :
+   - Crée un répertoire de sortie pour les résultats (images, CSV).
+   - Définit plusieurs scénarios de géométrie (manuel, sphère, circulaire, carré, yagi).
+   - Lance successivement chacune des stratégies d'optimisation (GA global,
+     ReflectAll, reflecteurs en continu, reflecteurs discrets).
+   - Génère et sauvegarde à chaque étape :
+       * Un ou plusieurs fichiers CSV récapitulant les puissances
+         (P_V_oc, P_Vin_oc, P_in, P_L).
+       * Des figures PNG (tracés de la géométrie, histogrammes de puissances,
+         etc.).
+   - Peut également gérer des cas d’étude plus complexes (e.g. rotation d’antenne,
+     paramétrisation de distance, etc.) en les bouclant dans la fonction `main()`.
+
+UTILISATION :
+- Ajuster le chemin `save_dir` dans `main()` pour définir où les résultats seront
+  enregistrés (CSV/PNG).
+- Lancer via : `python main.py`
+- Les géométries et scénarios sont configurés dans la partie `main()`.
+  Vous pouvez en ajouter/enlever selon vos besoins.
+
+DÉPENDANCES :
+- Python 3.x
+- numpy, matplotlib, csv, os, math, time
+- Modules internes (fichiers .py) :
+  * `constants.py` : contient `lam`, `half_length`.
+  * `geometry.py` : génération de coordonnées (manuel, random, circulaire, etc.).
+  * `simulation.py` : calcul d’impédances, tensions, courants.
+  * `optimization.py` : algorithmes d’optimisation (GA global, GA réflecteur, etc.).
+  * `plotting.py` : fonctions de tracé (3D, etc.).
+
+SORTIES :
+- Fichiers CSV : recap. des puissances (initiales et après optimisation),
+  impédances finales, etc.
+- Fichiers PNG : visualisations de la géométrie, histogrammes de puissances,
+  comparaisons avant/après optimisation, etc.
+
+AUTEUR : Michalak Lilian / Équipe : Rhodes / lilianmichalak2002@gmail.com
+--------------------------------------------------------------------------------
 """
-###############################################################################
-# main.py (corrected) : GA global + reflect_all + reflectors_continu + reflectors_discret
-###############################################################################
 import os
 import time
 import csv
